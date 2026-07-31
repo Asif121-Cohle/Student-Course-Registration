@@ -1,0 +1,6 @@
+user_id,username,password,role
+1000,admin,admin123,admin
+2104048,rahul,1234,student
+2104036,ishty,1324,student
+2104039,nirjhar,1345,student
+2104060,Asif,1246,student

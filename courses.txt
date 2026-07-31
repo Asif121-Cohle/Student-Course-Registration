@@ -1,0 +1,6 @@
+course_id,course_name,price,credit
+CSE101,Intro to Programming,500,3
+MTH101,Calculus I,400,4
+ENG101,English Basics,300,2
+CSE343,Data Communication,300,3
+CSE326,Operating System,500,3
