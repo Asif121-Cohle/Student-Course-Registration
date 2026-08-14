@@ -1,0 +1,3 @@
+1,admin1,adminpass,admin
+101,alice,alicepass,student
+102,bob,bobpass,student

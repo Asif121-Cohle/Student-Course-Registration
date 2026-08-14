@@ -1,0 +1,4 @@
+id,name,price,credit
+CSE101,Intro to CS,1000,3
+CSE102,Data Structures,1200,4
+CSE103,Algorithms,1200,4

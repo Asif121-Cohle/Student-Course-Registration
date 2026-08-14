@@ -1,0 +1,123 @@
+name: CI/CD - Student Course Registration
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  # ---------- STAGE 1: LINT ----------
+  lint:
+    name: Shellcheck Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run ShellCheck on all scripts
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: '.'
+          severity: warning
+
+      - name: Syntax-check every .sh file (bash -n)
+        run: |
+          set -e
+          for f in $(find . -name "*.sh"); do
+            echo "Checking syntax: $f"
+            bash -n "$f"
+          done
+
+  # ---------- STAGE 2: TEST ----------
+  test:
+    name: Run Bats Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install bats-core
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bats
+
+      - name: Run test suite
+        run: bats tests/
+
+  # ---------- STAGE 3: SECURITY / SECRET SCAN ----------
+  security:
+    name: Secret & Permission Scan
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Scan for hardcoded secrets/passwords
+        run: |
+          if grep -rniE "(password|passwd|secret|api_key)\s*=\s*['\"][^'\"]+['\"]" --include="*.sh" .; then
+            echo "::error::Possible hardcoded secret found"
+            exit 1
+          else
+            echo "No hardcoded secrets detected."
+          fi
+
+      - name: Verify no world-writable data files
+        run: |
+          find . -name "*.txt" -perm -o+w -exec echo "::warning::World-writable file: {}" \;
+
+  # ---------- STAGE 4: PACKAGE (only on main) ----------
+  package:
+    name: Package Release Artifact
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set version tag
+        id: version
+        run: echo "VERSION=$(date +'%Y.%m.%d')-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Create tarball
+        run: |
+          tar --exclude='.git' --exclude='.github' \
+              -czf course-registration-${{ steps.version.outputs.VERSION }}.tar.gz .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: course-registration-build
+          path: course-registration-*.tar.gz
+          retention-days: 30
+
+  # ---------- STAGE 5: DEPLOY (only on main, after package) ----------
+  deploy:
+    name: Deploy to Server
+    runs-on: ubuntu-latest
+    needs: package
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: course-registration-build
+
+      - name: Deploy via SSH/rsync
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          echo "Deploy step placeholder."
+          echo "In a real setup: scp the tarball to \$DEPLOY_HOST, ssh in,"
+          echo "extract it, and restart/re-link the CLI entry point (main.sh)."
+          # Example (uncomment and configure secrets in repo settings):
+          # mkdir -p ~/.ssh && echo "$DEPLOY_KEY" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
+          # scp -o StrictHostKeyChecking=no course-registration-*.tar.gz $DEPLOY_USER@$DEPLOY_HOST:/opt/app/
+          # ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST \
+          #   "cd /opt/app && tar xzf course-registration-*.tar.gz && bash main.sh --healthcheck"

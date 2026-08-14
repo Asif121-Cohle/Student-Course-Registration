@@ -139,9 +139,6 @@ view_unenrolled_courses() {
   done < courses.txt
 }
 
-
-
-
 drop_course() {
   sid=$1
   read -p "Enter Course ID to drop: " cid
