@@ -14,7 +14,7 @@ admin_menu() {
     echo "8. View Payments"
     echo "9. Verify Payment"
     echo "10. Logout"
-    read -p "Choose an option: " ch
+    read -r -p "Choose an option: " ch
 
     case $ch in
       1) add_student ;;
@@ -34,7 +34,7 @@ admin_menu() {
 
 add_student() {
   while true; do
-    read -p "Enter student ID: " sid
+    read -r -p "Enter student ID: " sid
     # Check if ID already exists
     if grep -q "^$sid," users.txt; then
       echo "Student ID already exists. Please try a different one."
@@ -44,7 +44,7 @@ add_student() {
   done
 
   while true; do
-    read -p "Enter student username: " uname
+    read -r -p "Enter student username: " uname
     # Check if username already exists (across all users)
     if cut -d',' -f2 users.txt | grep -qw "$uname"; then
       echo "Username already exists. Please choose another."
@@ -53,7 +53,7 @@ add_student() {
     fi
   done
 
-  read -s -p "Enter password: " pass
+  read -r -s -p "Enter password: " pass
   echo ""
 
   echo "$sid,$uname,$pass,student" >> users.txt
@@ -62,7 +62,7 @@ add_student() {
 
 
 remove_student() {
-  read -p "Enter student ID to remove: " sid
+  read -r -p "Enter student ID to remove: " sid
   grep -v "^$sid," users.txt > temp.txt && mv temp.txt users.txt
   grep -v "^$sid," enrollments.txt > temp.txt && mv temp.txt enrollments.txt
   grep -v "^$sid," payments.txt > temp.txt && mv temp.txt payments.txt
@@ -70,16 +70,16 @@ remove_student() {
 }
 
 add_course() {
-  read -p "Course ID: " cid
-  read -p "Course Name: " cname
-  read -p "Course Price: " price
-  read -p "Course Credit: " credit
+  read -r -p "Course ID: " cid
+  read -r -p "Course Name: " cname
+  read -r -p "Course Price: " price
+  read -r -p "Course Credit: " credit
   echo "$cid,$cname,$price,$credit" >> courses.txt
   echo "Course added!"
 }
 
 remove_course() {
-  read -p "Enter Course ID to remove: " cid
+  read -r -p "Enter Course ID to remove: " cid
   grep -v "^$cid," courses.txt > temp.txt && mv temp.txt courses.txt
   grep -v ",$cid" enrollments.txt > temp.txt && mv temp.txt enrollments.txt
   grep -v ",$cid," payments.txt > temp.txt && mv temp.txt payments.txt
@@ -97,7 +97,7 @@ admin_view_courses() {
 }
 
 verify_payment() {
-  read -p "Enter trx ID to verify: " trx
+  read -r -p "Enter trx ID to verify: " trx
 
   match=$(grep ",$trx,pending" payments.txt)
 
@@ -111,7 +111,7 @@ verify_payment() {
   course_name=$(grep "^$cid," courses.txt | cut -d',' -f2)
 
   echo "Transaction found for Student ID: $sid, Course: $course_name"
-  read -p "Approve payment? (y/n): " confirm
+  read -r -p "Approve payment? (y/n): " confirm
 
   if [[ "$confirm" == "y" ]]; then
     # Replace line exactly

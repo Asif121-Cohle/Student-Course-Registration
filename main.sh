@@ -9,7 +9,7 @@ main_menu() {
     echo "========== Course Registration =========="
     echo "1. Login"
     echo "2. Exit"
-    read -p "Choose an option: " choice
+    read -r -p "Choose an option: " choice
 
     case $choice in
       1) login ;;

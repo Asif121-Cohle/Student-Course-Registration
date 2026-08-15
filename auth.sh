@@ -2,8 +2,8 @@
 
 login() {
   echo "----- Login -----"
-  read -p "Username: " username
-  read -p "Password: " password
+  read -r -p "Username: " username
+  read -r -p "Password: " password
   echo
 
   user_line=$(grep ",$username,$password," users.txt)

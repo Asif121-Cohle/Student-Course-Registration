@@ -11,7 +11,7 @@ student_menu() {
     echo "3. View Enrolled Courses"
     echo "4. Drop a Course"
     echo "5. Logout"
-    read -p "Choose an option: " ch
+    read -r -p "Choose an option: " ch
 
     case $ch in
       1) enroll_courses "$sid" ;;
@@ -63,7 +63,7 @@ enroll_courses() {
     return
   fi
 
-  read -p "Enter course IDs to enroll (comma-separated): " input
+  read -r -p "Enter course IDs to enroll (comma-separated): " input
   IFS=',' read -ra course_ids <<< "$input"
 
   current_credits=$(get_enrolled_credits "$sid")
@@ -72,7 +72,7 @@ enroll_courses() {
 
   for cid in "${course_ids[@]}"; do
     # Check if course is available
-    if ! [[ " ${available_courses[*]} " =~ " $cid " ]]; then
+    if ! [[ " ${available_courses[*]} " =~  $cid  ]]; then
       echo "Course ID $cid is not available (already enrolled or invalid)."
       continue
     fi
@@ -101,7 +101,7 @@ enroll_courses() {
   fi
 
   echo "Total price for selected courses: $total_price"
-  read -p "Enter payment trx ID (for all selected courses): " trx
+  read -r -p "Enter payment trx ID (for all selected courses): " trx
 
   for cid in "${valid_courses[@]}"; do
     echo "$sid,$cid" >> enrollments.txt
@@ -118,7 +118,7 @@ enroll_courses() {
 view_courses() {
   sid=$1
   echo "===== Your Enrolled Courses ====="
-  grep "^$sid," payments.txt | grep ",verified$" | cut -d',' -f2 | while read cid; do
+  grep "^$sid," payments.txt | grep ",verified$" | cut -d',' -f2 | while read -r cid; do
     grep "^$cid," courses.txt
   done
 }
@@ -141,7 +141,7 @@ view_unenrolled_courses() {
 
 drop_course() {
   sid=$1
-  read -p "Enter Course ID to drop: " cid
+  read -r -p "Enter Course ID to drop: " cid
   grep -v "^$sid,$cid" enrollments.txt > temp.txt && mv temp.txt enrollments.txt
   grep -v "^$sid,$cid" payments.txt > temp.txt && mv temp.txt payments.txt
   echo "Dropped $cid"
