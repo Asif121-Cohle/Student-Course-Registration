@@ -1,4 +1,5 @@
 ![CI/CD](https://github.com/Asif121-Cohle/Student-Course-Registration/actions/workflows/ci-cd.yml/badge.svg)
+it is real demonstration of CI-CD pipeline actually working with two failed tests out of fifteen tests
 # 🎓 Student Course Registration System (Linux Shell Script)
 
 A terminal-based student course registration and payment system using Bash scripting. This system simulates course enrollments, payments, and admin/student panel functionalities — all through simple `.txt` files.
